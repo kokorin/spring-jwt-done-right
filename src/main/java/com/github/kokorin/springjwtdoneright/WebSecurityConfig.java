@@ -2,27 +2,22 @@ package com.github.kokorin.springjwtdoneright;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 
 import javax.servlet.Filter;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        super.configure(auth);
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -35,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationProvider(preAuthenticationProvider())
 
                 .authorizeRequests()
-                .antMatchers("login").permitAll()
+                .antMatchers("/login").permitAll()
                 .antMatchers("/**").authenticated();
 
     }
@@ -47,6 +42,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public Filter usernamePasswordFilter() throws Exception {
+        // By default filter listens to /login requests
+        // It awaits URL encoded username and password parameters
         UsernamePasswordAuthenticationFilter filter = new UsernamePasswordAuthenticationFilter();
 
         // Required, not injected automatically
@@ -73,8 +70,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
-
-
     @Bean
     public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler() {
         return new JwtAuthenticationSuccessHandler();
@@ -98,5 +93,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> preAuthenticatedUserDetailsService() {
         return new SimpleAuthenticationUserDetailsService();
+    }
+
+    @Bean
+    public UserDetailsService simpleUserDetailsService() {
+        return new SimpleUserDetailsService();
+    }
+
+    @Bean
+    public PasswordEncoder plaintextPasswordEncoder() {
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return rawPassword.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                return rawPassword.toString().equals(encodedPassword);
+            }
+        };
     }
 }

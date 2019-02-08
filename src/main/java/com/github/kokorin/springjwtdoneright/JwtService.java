@@ -1,6 +1,7 @@
 package com.github.kokorin.springjwtdoneright;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,7 +18,7 @@ public class JwtService {
     private static final String AUTHORITIES_CLAIM = "authorities";
 
 
-    @Value("${jwt.key:simple_key}")
+    @Value("${jwt.key:simple_key_must_be_at_least_80_bits_long}")
     public void setKey(String keyStr) {
         key = Keys.hmacShaKeyFor(keyStr.getBytes());
     }
