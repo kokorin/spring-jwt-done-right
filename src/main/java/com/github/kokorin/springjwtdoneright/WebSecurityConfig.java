@@ -3,9 +3,12 @@ package com.github.kokorin.springjwtdoneright;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,16 +21,24 @@ import javax.servlet.Filter;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .authenticationProvider(daoAuthenticationProvider())
+                .authenticationProvider(preAuthenticationProvider());
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
 
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                .and()
+
                 .addFilter(usernamePasswordFilter())
                 .addFilter(authenticationFilter())
-
-                .authenticationProvider(preAuthenticationProvider())
 
                 .authorizeRequests()
                 .antMatchers("/login").permitAll()
@@ -81,6 +92,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    public AuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(simpleUserDetailsService());
+        provider.setPasswordEncoder(plaintextPasswordEncoder());
+        return provider;
+    }
+
+    @Bean
     public AuthenticationProvider preAuthenticationProvider() {
         PreAuthenticatedAuthenticationProvider provider = new PreAuthenticatedAuthenticationProvider();
         // Default UserDetailsCheck will ensure, that authenticated UserDetails is enabled and,
@@ -92,7 +111,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> preAuthenticatedUserDetailsService() {
-        return new SimpleAuthenticationUserDetailsService();
+        return new JwtAuthenticationUserDetailsService();
     }
 
     @Bean

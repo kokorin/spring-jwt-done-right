@@ -41,6 +41,12 @@ public class JwtService {
     public SimpleUserDetails fromJwt(String jwt) {
         Claims claims = (Claims) Jwts.parser()
                 .setSigningKey(key)
+                // Disable expiration check in JWT, never throw ExpiredJwtException
+                // Expiration is controlled by Spring through UserDetails.isCredentialsNonExpired
+                // SimpleUserDetails knows expiration time.
+                // It's checked in  org.springframework.security.core.userdetails.UserDetailsChecker.check()
+                // at org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider.authenticate()
+                .setAllowedClockSkewSeconds(Integer.MAX_VALUE)
                 .parse(jwt)
                 .getBody();
 
