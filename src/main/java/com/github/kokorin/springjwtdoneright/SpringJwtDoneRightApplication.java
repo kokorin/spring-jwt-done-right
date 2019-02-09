@@ -8,9 +8,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 public class SpringJwtDoneRightApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SpringJwtDoneRightApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SpringJwtDoneRightApplication.class, args);
+    }
 
 }
 

@@ -41,17 +41,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(authenticationFilter())
 
                 .authorizeRequests()
-                .antMatchers("/login").permitAll()
+                .antMatchers("/login", "/logout", "/error").permitAll()
                 .antMatchers("/**").authenticated();
 
     }
 
     /**
-     * Bean annotation is required for this Filter to be initialized by Spring Context.
      * Internally this filter will extract username and password and create UsernamePasswordAuthenticationToken.
      * This token will be authenticated by corresponding AuthenticationProvider.
      */
-    @Bean
     public Filter usernamePasswordFilter() throws Exception {
         // By default filter listens to /login requests
         // It awaits URL encoded username and password parameters
@@ -67,11 +65,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     /**
-     * Bean annotation is required for this Filter to be initialized by Spring Context.
      * Internally this filter will check AUTHORIZATION header and create PreAuthenticatedAuthenticationToken.
      * This token will be authenticated by corresponding AuthenticationProvider.
      */
-    @Bean
     public Filter authenticationFilter() throws Exception {
         JwtPreAuthenticatedProcessingFilter filter = new JwtPreAuthenticatedProcessingFilter();
 

@@ -18,7 +18,7 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest,
                                         HttpServletResponse httpServletResponse,
                                         Authentication authentication) throws IOException, ServletException {
-        String jwt = jwtService.toJwt((SimpleUserDetails)authentication.getPrincipal());
+        String jwt = jwtService.toJwt((SimpleUserDetails) authentication.getPrincipal());
 
         httpServletResponse.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
     }
